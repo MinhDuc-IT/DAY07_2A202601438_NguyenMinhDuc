@@ -82,40 +82,42 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2–3 tài liệu (ví d�
 
 ### Chiến lược của từng thành viên
 
+> Phân công **không trùng** (mỗi người một hướng). Code Phase 1 vẫn implement đủ 3 chunker built-in để pass test — chiến lược dưới đây là chiến lược dùng khi so sánh Phase 2.
+
 **Thành viên 1 — Nguyễn Minh Đức (2A202601438)**
 
 - **Loại chiến lược:** RecursiveChunker (`chunk_size=500`)
-- **Mô tả & lý do chọn cho chủ đề này:** Chính sách TMĐT có cấu trúc đoạn/điều khoản; cắt đệ quy theo separator giúp giữ khối ý hoàn chỉnh hơn FixedSize, phù hợp câu hỏi cần ngữ cảnh (đổi trả, vận chuyển, xử phạt seller).
+- **Mô tả & lý do chọn cho chủ đề này:** Chính sách TMĐT có cấu trúc đoạn/điều khoản; cắt đệ quy theo separator giúp giữ khối ý hoàn chỉnh hơn FixedSize, phù hợp câu hỏi cần ngữ cảnh (đổi trả, vận chuyển, xử phạt seller). Đã chạy trên corpus `data/k4_ecommerce` với OpenAI embedder.
 
 **Thành viên 2 — Ngô Huy Hoàn (2A202601925)**
 
-- **Loại chiến lược:** SentenceChunker
-- **Mô tả & lý do chọn:** Cắt theo ranh giới câu để tránh đứt giữa chừng; phù hợp FAQ / câu hỏi ngắn cần khớp một ý cụ thể.
+- **Loại chiến lược:** Custom — `DocumentStructureChunker` (chia theo tiêu đề Markdown `#` / `##`…)
+- **Mô tả & lý do chọn:** Đã có sẵn trong code cá nhân; phù hợp tài liệu chính sách có heading. Đây là chiến lược **khác** 3 loại built-in, đáp ứng yêu cầu K4 “ít nhất một thành viên thử chia theo tiêu đề/FAQ”. (Có thể thử thêm `SemanticChunker` nếu cần so sánh phụ.)
 
 **Thành viên 3 — Ngô Văn Kiệt (2A202601524)**
 
 - **Loại chiến lược:** FixedSizeChunker (`chunk_size=300`, `overlap=50`)
-- **Mô tả & lý do chọn:** Độ dài ổn định, dễ kiểm soát token; overlap giúp giảm mất thông tin ở biên chunk.
+- **Mô tả & lý do chọn:** Độ dài ổn định, dễ kiểm soát token; overlap giúp giảm mất thông tin ở biên chunk. Là baseline đơn giản để đối chiếu với Recursive / Sentence / Structure.
 
 **Thành viên 4 — Phạm Văn Vinh (2A202601988)**
 
-- **Loại chiến lược:** Custom — chia theo tiêu đề / cặp FAQ (heading / FAQ-pair) khi tài liệu có cấu trúc mục lục câu hỏi
-- **Mô tả & lý do chọn:** K4 khuyến khích thử chunk theo heading/FAQ; hữu ích với `shopee-payment-faq` và các mục đánh số trong chính sách.
+- **Loại chiến lược:** SentenceChunker (`max_sentences_per_chunk=3`)
+- **Mô tả & lý do chọn:** Cắt theo ranh giới câu để tránh đứt giữa chừng; phù hợp FAQ / câu hỏi ngắn cần khớp một ý cụ thể. Không trùng Recursive (Đức) hay Fixed (Kiệt); code hiện có sẵn SentenceChunker.
 
 ### So Sánh Giữa Các Thành Viên
 
 
-| Thành viên      | Chiến lược (Strategy) | Điểm truy xuất (/10) | Điểm mạnh                                        | Điểm yếu                                                             |
-| --------------- | --------------------- | -------------------- | ------------------------------------------------ | -------------------------------------------------------------------- |
-| Nguyễn Minh Đức | RecursiveChunker      | 8                    | Giữ đoạn/điều khoản; top-3 ổn trên corpus 7 file | Top-1 đôi khi là điều kiện/ngoại lệ thay vì câu trả lời trực tiếp    |
-| Ngô Huy Hoàn    | SentenceChunker       | 7                    | Khớp câu ngắn / FAQ tốt                          | Dễ mất ngữ cảnh bao quát                                             |
-| Ngô Văn Kiệt    | FixedSizeChunker      | 6–7                  | Đều kích thước, có overlap                       | Vẫn cắt ngang câu/ý                                                  |
-| Phạm Văn Vinh   | Heading / FAQ-pair    | 7–8                  | Tốt với FAQ & mục có tiêu đề                     | Phụ thuộc cấu trúc tài liệu; tài liệu “điều khoản liền mạch” kém hơn |
+| Thành viên      | Chiến lược (Strategy)                         | Điểm truy xuất (/10) | Điểm mạnh                                                        | Điểm yếu                                                                 |
+| --------------- | --------------------------------------------- | -------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Nguyễn Minh Đức | RecursiveChunker                              | 8                    | Giữ đoạn/điều khoản; top-3 ổn trên corpus 7 file                 | Top-1 đôi khi là điều kiện/ngoại lệ thay vì câu trả lời trực tiếp        |
+| Ngô Huy Hoàn    | DocumentStructureChunker (custom / heading)   | 7                    | Giữ nguyên mục theo tiêu đề; khác biệt rõ so với built-in        | Phụ thuộc tài liệu có heading rõ; cần embedder thật (tránh mock)         |
+| Ngô Văn Kiệt    | FixedSizeChunker (`300` / `overlap=50`)       | 6–7                  | Đều kích thước, có overlap; dễ so sánh baseline                  | Vẫn cắt ngang câu/ý                                                      |
+| Phạm Văn Vinh   | SentenceChunker                               | 7–8                  | Khớp câu ngắn / FAQ tốt; retrieval ổn khi dùng embedder thật     | Dễ mất ngữ cảnh bao quát trên điều khoản dài                             |
 
 
 **Chiến lược nào tốt nhất cho chủ đề này? Tại sao?**
 
-> Với corpus chính sách dài (returns, shipping, seller-listing), **RecursiveChunker** thường cân bằng tốt hơn giữa độ dài chunk và ranh giới ngữ nghĩa. Sentence phù hợp câu hỏi cực ngắn; Fixed dễ cắt đứt điều khoản; custom heading/FAQ mạnh khi nguồn có cấu trúc mục lục rõ.
+> Với corpus chính sách dài (returns, shipping, seller-listing), **RecursiveChunker** thường cân bằng tốt hơn giữa độ dài chunk và ranh giới ngữ nghĩa. **SentenceChunker** phù hợp câu hỏi cực ngắn; **FixedSize** dễ cắt đứt điều khoản nhưng là baseline rõ; **DocumentStructureChunker** mạnh khi nguồn có heading Markdown rõ (và đáp ứng yêu cầu thử chiến lược theo tiêu đề của K4).
 
 ---
 
@@ -140,13 +142,13 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2–3 tài liệu (ví d�
 > Cách chấm (theo `docs/SCORING.md`): **2 điểm/câu** — top-3 chứa chunk liên quan + agent trả lời đúng (2), có liên quan nhưng thiếu/không ở top-1 (1), không có trong top-3 (0).
 
 
-| #   | Câu hỏi                | Chiến lược tốt nhất cho câu này               | Có chunk liên quan trong top-3? | Ghi chú                                                                                                               |
-| --- | ---------------------- | --------------------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| 1   | Làm sao để trả hàng... | RecursiveChunker                              | Có                              | Doc đúng `shopee-returns-refunds`; top-1 có thể lệch sang điều kiện liên kết phương thức hoàn tiền. Score ví dụ ~0.69 |
-| 2   | Thời gian hoàn tiền... | RecursiveChunker                              | Có (một phần)                   | Dễ trả về chunk “hoàn tiền khi đơn chưa chuẩn bị” thay vì timeline xử lý chi tiết. Score ví dụ ~0.64                  |
-| 3   | Tiki thu thập...       | Sentence / Recursive + filter `platform=tiki` | Có                              | Filter metadata quan trọng để tránh lẫn privacy Shopee. Score ví dụ ~0.68                                             |
-| 4   | Hàng dễ vỡ...          | RecursiveChunker                              | Có                              | Top-3 có chunk danh mục dễ vỡ trong `shopee-shipping-policy`. Score ví dụ ~0.61                                       |
-| 5   | Bán hàng giả...        | Recursive + filter `customer_role=seller`     | Có                              | Filter seller giúp tập trung `shopee-seller-listing`. Score ví dụ ~0.59                                               |
+| #   | Câu hỏi                | Chiến lược tốt nhất cho câu này                          | Có chunk liên quan trong top-3? | Ghi chú                                                                                                               |
+| --- | ---------------------- | -------------------------------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| 1   | Làm sao để trả hàng... | RecursiveChunker (Đức) / SentenceChunker (Vinh)          | Có                              | Doc đúng `shopee-returns-refunds`; top-1 có thể lệch sang điều kiện liên kết phương thức hoàn tiền. Score ví dụ ~0.69 |
+| 2   | Thời gian hoàn tiền... | RecursiveChunker                                         | Có (một phần)                   | Dễ trả về chunk “hoàn tiền khi đơn chưa chuẩn bị” thay vì timeline xử lý chi tiết. Score ví dụ ~0.64                  |
+| 3   | Tiki thu thập...       | Sentence / Structure + filter `platform=tiki`            | Có                              | Filter metadata quan trọng để tránh lẫn privacy Shopee. Score ví dụ ~0.68                                             |
+| 4   | Hàng dễ vỡ...          | RecursiveChunker / DocumentStructureChunker              | Có                              | Top-3 có chunk danh mục dễ vỡ trong `shopee-shipping-policy`. Score ví dụ ~0.61                                       |
+| 5   | Bán hàng giả...        | Recursive / Fixed + filter `customer_role=seller`        | Có                              | Filter seller giúp tập trung `shopee-seller-listing`. Score ví dụ ~0.59                                               |
 
 
 **Lọc bằng metadata có giúp ích không? Ở câu hỏi nào?**
@@ -165,7 +167,7 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2–3 tài liệu (ví d�
 
 **Bài học rút ra khi so sánh trong nhóm:**
 
-> Cùng corpus 7 tài liệu, Recursive thường ổn cho điều khoản dài; Sentence/FAQ tốt cho câu hỏi ngắn; Fixed đơn giản nhưng dễ cắt ý. Ít nhất một thành viên thử heading/FAQ giúp nhóm thấy giới hạn của chunk “một kiểu cho mọi tài liệu”.
+> Cùng corpus 7 tài liệu, bốn hướng không trùng: Recursive (điều khoản dài), DocumentStructure (theo heading — đáp ứng K4), FixedSize (baseline), Sentence (câu hỏi ngắn). Recursive thường ổn tổng thể; Structure phụ thuộc heading; Fixed dễ cắt ý; Sentence mất ngữ cảnh đoạn. Embedding thật quan trọng — mock làm kết quả competition gần như ngẫu nhiên.
 
 **Nếu làm lại, nhóm sẽ thay đổi gì trong chiến lược dữ liệu (data strategy)?**
 
