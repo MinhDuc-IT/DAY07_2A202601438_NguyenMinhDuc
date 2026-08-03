@@ -1,0 +1,26 @@
+size=399
+---Q1---
+Thoi han gui yeu cau tra hang hoan tien tren Shopee la bao lau?
+score=0.36079108826835643 doc=shopee-privacy-policy role=both cat=privacy-policy
+Những ứng dụng này có thể truy cập riêng, và cho phép một bên thứ ba xem, thông tin nhận dạng của bạn, chẳng hạn như tên, ID người dùng của bạn, Địa chỉ IP của thiết bị của bạn hoặ
+Based on retrieved policy context.
+---Q2---
+Nguoi ban can tuan thu quy dinh nao khi dang ban san pham?
+score=0.33980247805721187 doc=shopee-seller-listing role=seller cat=seller-listing
+a. Người đăng phải chọn đúng nhóm danh mục ngành hàng cho sản phẩm để có thể dễ dàng tiếp cận với khách hàng.  b. Trường hợp sản phẩm nằm ngoài những ngành hàng sẵn có, hãy chọn da
+Based on retrieved policy context.
+---Q3---
+Chinh sach van chuyen Shopee quy dinh gi ve dong kiem?
+score=0.3649617208447192 doc=shopee-shipping-policy role=both cat=shipping-policy
+   i. Thông tin Người Bán bao gồm: Tên người bán, địa chỉ gửi hàng;     ii. Thông tin Người Mua, bao gồm: Tên Người Mua và địa chỉ nhận hàng;     iii. Thông tin về hàng hóa trong g
+Based on retrieved policy context.
+---Q4---
+Shopee Dam Bao bao ve nguoi mua nhu the nao?
+score=0.35646300577080997 doc=shopee-seller-listing role=seller cat=seller-listing
+- Ngoài các quy định về thông tin mô tả như nêu trên, thông tin về hàng hóa được đăng bán phải bao gồm các nội dung bắt buộc thể hiện trên nhãn hàng hóa theo quy định pháp luật về 
+Based on retrieved policy context.
+---Q5---
+Chinh sach bao mat thong tin ca nhan thu thap nhung gi?
+score=0.30710988923570187 doc=shopee-privacy-policy role=both cat=privacy-policy
+Nếu bạn đăng nhập để trở thành Người sử dụng các Nền tảng của chúng tôi sử dụng tài khoản mạng xã hội của Bạn (“Tài khoản Mạng Xã hội”), liên kết tài khoản của bạn với Tài khoản Mạ
+Based on retrieved policy context.

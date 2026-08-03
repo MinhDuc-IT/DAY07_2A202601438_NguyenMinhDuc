@@ -28,21 +28,52 @@ class EmbeddingStore:
         self._next_index = 0
 
         try:
-            import chromadb  # noqa: F401
+            import chromadb
 
-            # TODO: initialize chromadb client + collection
+            client = chromadb.Client()
+            self._collection = client.get_or_create_collection(name=collection_name)
             self._use_chroma = True
         except Exception:
             self._use_chroma = False
             self._collection = None
 
-    def _make_record(self, doc: Document) -> dict[str, Any]:
-        # TODO: build a normalized stored record for one document
-        raise NotImplementedError("Implement EmbeddingStore._make_record")
+    def _make_record(self, doc: Document, embedding: list[float] | None = None) -> dict[str, Any]:
+        metadata = dict(doc.metadata or {})
+        metadata.setdefault("doc_id", doc.id)
+        record_id = f"{doc.id}_{self._next_index}"
+        self._next_index += 1
+        return {
+            "id": record_id,
+            "doc_id": doc.id,
+            "content": doc.content,
+            "metadata": metadata,
+            "embedding": embedding if embedding is not None else self._embedding_fn(doc.content),
+        }
+
+    def _embed_texts(self, texts: list[str]) -> list[list[float]]:
+        embed_batch = getattr(self._embedding_fn, "embed_batch", None)
+        if callable(embed_batch):
+            return embed_batch(texts)
+        return [self._embedding_fn(text) for text in texts]
 
     def _search_records(self, query: str, records: list[dict[str, Any]], top_k: int) -> list[dict[str, Any]]:
-        # TODO: run in-memory similarity search over provided records
-        raise NotImplementedError("Implement EmbeddingStore._search_records")
+        if not records or top_k <= 0:
+            return []
+
+        query_embedding = self._embedding_fn(query)
+        scored: list[dict[str, Any]] = []
+        for record in records:
+            score = float(_dot(query_embedding, record["embedding"]))
+            scored.append(
+                {
+                    "id": record.get("id"),
+                    "content": record["content"],
+                    "score": score,
+                    "metadata": dict(record.get("metadata") or {}),
+                }
+            )
+        scored.sort(key=lambda item: item["score"], reverse=True)
+        return scored[:top_k]
 
     def add_documents(self, docs: list[Document]) -> None:
         """
@@ -51,8 +82,26 @@ class EmbeddingStore:
         For ChromaDB: use collection.add(ids=[...], documents=[...], embeddings=[...])
         For in-memory: append dicts to self._store
         """
-        # TODO: embed each doc and add to store
-        raise NotImplementedError("Implement EmbeddingStore.add_documents")
+        if not docs:
+            return
+
+        embeddings = self._embed_texts([doc.content for doc in docs])
+        for doc, embedding in zip(docs, embeddings):
+            record = self._make_record(doc, embedding=embedding)
+            self._store.append(record)
+
+            if self._use_chroma and self._collection is not None:
+                chroma_metadata = {
+                    key: value
+                    for key, value in record["metadata"].items()
+                    if isinstance(value, (str, int, float, bool))
+                } or {"doc_id": record["doc_id"]}
+                self._collection.add(
+                    ids=[record["id"]],
+                    documents=[record["content"]],
+                    embeddings=[record["embedding"]],
+                    metadatas=[chroma_metadata],
+                )
 
     def search(self, query: str, top_k: int = 5) -> list[dict[str, Any]]:
         """
@@ -60,13 +109,11 @@ class EmbeddingStore:
 
         For in-memory: compute dot product of query embedding vs all stored embeddings.
         """
-        # TODO: embed query, compute similarities, return top_k
-        raise NotImplementedError("Implement EmbeddingStore.search")
+        return self._search_records(query, self._store, top_k)
 
     def get_collection_size(self) -> int:
         """Return the total number of stored chunks."""
-        # TODO
-        raise NotImplementedError("Implement EmbeddingStore.get_collection_size")
+        return len(self._store)
 
     def search_with_filter(self, query: str, top_k: int = 3, metadata_filter: dict = None) -> list[dict]:
         """
@@ -74,8 +121,15 @@ class EmbeddingStore:
 
         First filter stored chunks by metadata_filter, then run similarity search.
         """
-        # TODO: filter by metadata, then search among filtered chunks
-        raise NotImplementedError("Implement EmbeddingStore.search_with_filter")
+        if not metadata_filter:
+            return self.search(query, top_k=top_k)
+
+        filtered = [
+            record
+            for record in self._store
+            if all((record.get("metadata") or {}).get(key) == value for key, value in metadata_filter.items())
+        ]
+        return self._search_records(query, filtered, top_k)
 
     def delete_document(self, doc_id: str) -> bool:
         """
@@ -83,5 +137,23 @@ class EmbeddingStore:
 
         Returns True if any chunks were removed, False otherwise.
         """
-        # TODO: remove all stored chunks where metadata['doc_id'] == doc_id
-        raise NotImplementedError("Implement EmbeddingStore.delete_document")
+        remaining: list[dict[str, Any]] = []
+        removed_ids: list[str] = []
+        for record in self._store:
+            metadata = record.get("metadata") or {}
+            belongs = record.get("doc_id") == doc_id or metadata.get("doc_id") == doc_id
+            if belongs:
+                removed_ids.append(record["id"])
+            else:
+                remaining.append(record)
+
+        if not removed_ids:
+            return False
+
+        self._store = remaining
+        if self._use_chroma and self._collection is not None:
+            try:
+                self._collection.delete(ids=removed_ids)
+            except Exception:
+                pass
+        return True

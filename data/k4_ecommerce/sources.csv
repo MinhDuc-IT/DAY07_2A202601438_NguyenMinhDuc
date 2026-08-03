@@ -1,3 +1,8 @@
 doc_id,file_path,title,source_url,retrieved_at,document_version,license_or_permission
-k4-returns-policy,data/k4_ecommerce/returns-policy.md,Chính sách đổi trả,https://example.com/chinh-sach/doi-tra,2026-08-02,2026.1,example-template-replace-me
-k4-seller-listing,data/k4_ecommerce/seller-listing.md,Quy định đăng bán,https://example.com/nguoi-ban/dang-ban,2026-08-02,2026.1,example-template-replace-me
+shopee-buyer-protection,data/k4_ecommerce/shopee-buyer-protection.md,Shopee Đảm Bảo là gì,https://help.shopee.vn/portal/4/article/79314,2026-08-03,not-stated,public-page
+shopee-payment-faq,data/k4_ecommerce/shopee-payment-faq.md,Tổng hợp câu hỏi thường gặp về thanh toán Shopee,https://help.shopee.vn/portal/4/article/79526,2026-08-03,not-stated,public-page
+shopee-privacy-policy,data/k4_ecommerce/shopee-privacy-policy.md,Chính sách bảo mật Shopee,https://help.shopee.vn/portal/4/article/77244,2026-08-03,not-stated,public-page
+shopee-returns-refunds,data/k4_ecommerce/shopee-returns-refunds.md,Chính sách trả hàng và hoàn tiền Shopee,https://help.shopee.vn/portal/4/article/77251,2026-08-03,not-stated,public-page
+shopee-seller-listing,data/k4_ecommerce/shopee-seller-listing.md,Quy định về đăng bán sản phẩm trên Shopee,https://help.shopee.vn/portal/4/article/77246,2026-08-03,not-stated,public-page
+shopee-shipping-policy,data/k4_ecommerce/shopee-shipping-policy.md,Chính sách vận chuyển Shopee,https://help.shopee.vn/portal/4/article/77250,2026-08-03,not-stated,public-page
+tiki-privacy-policy,data/k4_ecommerce/tiki-privacy-policy.md,Chính sách bảo mật thông tin cá nhân Tiki,https://tiki.vn/thong-tin/privacy-policy,2026-08-03,not-stated,public-page

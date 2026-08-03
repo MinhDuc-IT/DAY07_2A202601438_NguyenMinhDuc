@@ -1,0 +1,5 @@
+1	-0.126578	Shopee cho phep tra hang hoan tien trong 15 ngay.	Nguoi mua co the yeu cau hoan tien sau khi nhan hang.
+2	0.040915	Chinh sach van chuyen quy dinh thoi gian giao hang.	Seller phai dong goi dung khoi luong dang ky.
+3	0.106215	Python is a programming language.	Tra hang hoan tien tren san thuong mai dien tu.
+4	0.175511	Shopee Dam Bao bao ve quyen loi nguoi mua.	Buyer protection giup khach yen tam mua sam.
+5	-0.019730	Quy dinh dang ban san pham tren Shopee.	Phuong thuc thanh toan COD va ShopeePay.
